@@ -190,5 +190,14 @@ Update a scheduled session :
   a. True or False
 
 
+TO DO :
+Get Meeting Play back Recording URL :
+      Returns the video playback URL.
 
+  a.  :room_id  (mandatory)
+ 
+  Request Command :
+    innowhite.getRecordingURL({})
 
+  Return Value :
+  a. URL

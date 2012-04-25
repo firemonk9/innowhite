@@ -42,13 +42,15 @@ Join an existing session
   Joining the existing room and get its room url to access it.
 
   Arguments :
-  - room_id => (mandatory) The room id which want to join.
-  - username => (mandatory) Username of the user who want to join the room.
+  a. room_id => (mandatory) The room id which want to join.
+  b. username => (mandatory) Username of the user who want to join the room.
 
   Request Command :
     innowhite.join_meeting(room_id, username). Ex : innowhite.join_meeting(12345, "bainur")
-
-
+  
+   Return value :
+  a. URL  (this URL will be passed to the user, the user needs to be redirected to open in new page.)   
+   
 
 
 

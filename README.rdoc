@@ -25,13 +25,11 @@ Create new session :
 
   Arguments (as a Hash) : 
   a. :user => the name of the moderator (ex. "John")
-  b. :parentOrg => (mandatory) The name of the parent organization. ("innowhite" as default.)
-  b. :orgName => (optional) Organization name (same as :parentOrg by default).
-  c. :tags => (optional). Example : (math 101, calculus, integration)
-  d. :desc => (optional) Description of the room. (ex: Definite Integrals by John)	
+  b. :tags => (optional). Example : (math 101, calculus, integration)
+  c. :desc => (optional) Description of the room. (ex: Definite Integrals by John)	
 
   Request Command :
-  innowhite.create_room({}). Ex : innowhite.create_room({:user => "bainur", :parentOrg => "innowhite", :orgName => "41studio", :tags => "testing, room testing", :desc => "This is only testing for the room"})
+  innowhite.create_room({}). Ex : innowhite.create_room({:user => "bainur", :tags => "testing, room testing", :desc => "This is only testing for the room"})
 
   Return value :
   a. Room Id
@@ -60,9 +58,7 @@ Get the live sessions
 
   Arguments (as a Hash) :
   a. :tags (optional)
-  b. :orgName  (optional)
-  c. :parentOrg (mandatory)
-  d. :user (optional)
+  b. :user (optional)
 
   Request Command :
     innowhite.get_sessions({})
@@ -82,14 +78,12 @@ Schedule a session :
   Scheduling new session.
   
   Arguments (as a Hash) :
-  a. :tags   (optional)
-  b. :orgName  (optional)
-  c. :parentOrg  (mandatory)
-  d. :startTime (format should be in milliseconds)
-  e. :timeZone (GMT time zone )  (ex : +1, +2) 
-  f. :endTime (format should be in milliseconds)
-  g. :user
-  h. :description
+  a. :tags   (optional) 
+  b. :startTime (format should be in milliseconds)
+  c. :timeZone (GMT time zone )  (ex : +1, +2) 
+  d. :endTime (format should be in milliseconds)
+  e. :user
+  f. :description
   
   Request Command :
     innowhite.schedule_meeting({})
@@ -108,9 +102,7 @@ Get the past sessions
 
   Arguments (as a Hash) :
   a. :tags (optional)
-  b. :orgName  (optional)
-  c. :parentOrg (mandatory)
-  d. :user (optional)
+  b. :user (optional)
 
   Request Command :
     innowhite.past_sessions({})
@@ -126,17 +118,12 @@ Get the past sessions
 
 
 
-
-
-
-
 Get the scheduled sessions
   Get the list of scheduled sessions.
 
   Arguments (as a Hash) :
   a. :tags (optional)
-  b. :orgName  (optional)
-  c. :parentOrg (mandatory)
+  b. :user (optional)
 
   Request Command :
     innowhite.get_scheduled_list({})

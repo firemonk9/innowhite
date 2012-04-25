@@ -1,7 +1,7 @@
 Getting Started
 
 Step 1:
-Install it with RubyGems
+Install innowhite gem with RubyGems
 
 gem install innowhite
 or add this to your Gemfile if you use Bundler:

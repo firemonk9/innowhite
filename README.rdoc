@@ -9,17 +9,15 @@ gem "innowhite"
 
 Step 2:
 Place the innowhite.yml file in the config directory.
+This file will be sent to you by email.
 
 
-
-
-First of all, we need to initialize the Innowhite class
-
+In the code :
+we need to initialize the Innowhite class
 innowhite = Innowhite.new
 
 
 Available Command Requests
-
 Then we could access the available methods from the instance :
 
 Create new session :

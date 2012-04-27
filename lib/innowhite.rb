@@ -24,76 +24,60 @@ class Innowhite
   end
 
   def create_room(params = {})
-    params[:parentOrg] ||= @parent_org
-    params[:orgName] ||= @org_name
     user = params[:user]
     tags = params[:tags]
     desc = params[:desc]
-    #parent_org = params[:parentOrg]
     @org_name = @parent_org if @org_name.nil?
     room_id = set_room_id
-    address = join_room_helper(@server_address,@org_name, room_id, user,true)
-    res = create_room_info(room_id,user,tags,desc, @org_name,address)
-    res = res.include?("Missing")
-    if res == true
-      return "Failed to fetch, maybe you have entered wrong username / organization name .."
-    else
-      return {:address => address, :room_id => room_id}
-    end
+    address = join_room_helper(@server_address, @org_name, room_id, user, true)
+    res = create_room_info(room_id, user, tags, desc, @org_name, address)
+    res.include?("Missing") ? "Failed to fetch, maybe you have entered wrong username / organization name .." : {:address => address, :room_id => room_id}
   end
 
-  def create_room_info(room_id,user,tags,desc, parent_org,address)
+  def create_room_info(room_id, user, tags, desc, parent_org, address)
     checksum_tmp = "parentOrg=#{parent_org}&orgName=#{parent_org}"
     checksum = generating_checksum(URI.escape(checksum_tmp))
 
-    res = RestClient.post("#{@api_address}create_room_info",
-      {:roomId => room_id, :user => user, :tags => tags,:desc => desc,
-        :parentOrg => parent_org, :address => address, :orgName => parent_org,
-        :checksum => checksum
-        }
+    RestClient.post("#{@api_address}create_room_info",
+      {:roomId => room_id, :user => user, :tags => tags, :desc => desc,
+       :parentOrg => parent_org, :address => address, :orgName => parent_org,
+       :checksum => checksum
+      }
     )
-    return res
   end
 
   def set_room_id
-    room_id = ""
-    url = "#{@server_address}CreateRoom?parentOrg=#{@parent_org}&orgName=#{@org_name}&user=#{@mod_name}&checksum=#{generate_checksum(@parent_org,@org_name, @mod_name)}"
+    url = "#{@server_address}CreateRoom?parentOrg=#{@parent_org}&orgName=#{@org_name}&user=#{@mod_name}&checksum=#{generate_checksum(@parent_org, @org_name, @mod_name)}"
     doc = Nokogiri::XML(open(url))
-    status = doc.xpath('//returnStatus').text.gsub("\n","") rescue ""
+    status = doc.xpath('//returnStatus').text.gsub("\n", "") rescue ""
+
     if status.include?('SUCCESS')
-      room_id = doc.xpath('//roomId').text.gsub("\n","").to_i
+      doc.xpath('//roomId').text.gsub("\n", "").to_i
     elsif status.include?('AUTH_FAILED')
-      room_id = "AUTH_FAILED"
+      "AUTH_FAILED"
     elsif status.include?('EXPIRED')
-      room_id = 'EXPIRED'
+      'EXPIRED'
     elsif status.include?('OUT_OF_SERVICE')
-      room_id = 'OUT_OF_SERVICE'
+      'OUT_OF_SERVICE'
     else
-      room_id = "Error With the Server #{@server_address}CreateRoom?parentOrg=#{@parent_org}&orgName=#{@org_name}&user=#{@mod_name}&checksum=#{generate_checksum(@parent_org,@org_name, @mod_name)}"
+      "Error With the Server #{url}"
     end
-    return room_id
   end
 
   def join_meeting(room_id, user)
     url = "#{@api_address}exist_session?roomId=#{room_id}"
     doc = Nokogiri::XML(open(url))
-    missing = false
     if doc.text.blank?
-      missing = true
-    end
-    address = join_room_helper(@server_address,@org_name, room_id, user, false)
-    if missing
       raise "Room is not exist / Expired"
     else
-      return address
+      join_room_helper(@server_address, @org_name, room_id, user, false)
     end
-
   end
 
   def past_sessions(params = {})
     begin
       params[:parentOrg] ||= @parent_org
-      org_name1 = params[:parentOrg] if params[:orgName].nil?
+      org_name1 = params[:orgName] || params[:parentOrg]
       ids = []
       parent_org = params[:parentOrg]
       user = params[:user]
@@ -103,30 +87,23 @@ class Innowhite
       tmp = "parentOrg=#{parent_org}&orgName=#{org_name1}&user=#{user}&tags=#{tags}"
       checksum_tmp = "parentOrg=#{parent_org}&orgName=#{org_name1}"
       checksum = generating_checksum(URI.escape(checksum_tmp))
-     # pp  "#{@api_address}list_sessions?#{tmp}&cheksum=#{checksum}"
+      # pp  "#{@api_address}list_sessions?#{tmp}&cheksum=#{checksum}"
       url = URI.escape("#{@api_address}past_sessions?#{tmp}&checksum=#{checksum}")
 
       x = Nokogiri::XML(open(url))
-      x.xpath('//web-session/session-id').each{|m| ids << m.text}
-      x.xpath('//web-session/session-desc').each{|m| descs << m.text}
+      x.xpath('//web-session/session-id').each { |m| ids << m.text }
+      x.xpath('//web-session/session-desc').each { |m| descs << m.text }
 
-      ids.each_with_index do |id, index|
-        res << {:id => id, :description => descs[index]}
-      end
-      return res
-    rescue => e
-      return "Error fetching sessions check the organization and private key .."
+      ids.each_with_index { |id, index|  res << {:id => id, :description => descs[index]} }
+      res
+    rescue
+      "Error fetching sessions check the organization and private key .."
     end
   end
 
   def get_sessions(params = {})
-    begin
     params[:parentOrg] ||= @parent_org
-    if params[:orgName].nil?
-      org_name1 = params[:parentOrg]
-    else
-      org_name1 = params[:orgName]
-    end
+    org_name1 = params[:orgName] || params[:parentOrg]
     ids = []
     parent_org = params[:parentOrg]
     org_name1 = parent_org if org_name1.blank?
@@ -140,16 +117,13 @@ class Innowhite
     url = URI.escape("#{@api_address}list_sessions?#{tmp}&checksum=#{checksum}")
 
     x = Nokogiri::XML(open(url))
-    x.xpath('//web-session/session-id').each{|m| ids << m.text}
-    x.xpath('//web-session/session-desc').each{|m| descs << m.text}
+    x.xpath('//web-session/session-id').each { |m| ids << m.text }
+    x.xpath('//web-session/session-desc').each { |m| descs << m.text }
 
-    ids.each_with_index do |id, index|
-      res << {:id => id, :description => descs[index]}
-    end
-    return res
-    rescue => e
-      return "Error fetching sessions check the organization and private key .."
-    end
+    ids.each_with_index { |id, index|  res << {:id => id, :description => descs[index]} }
+    res
+    rescue
+      "Error fetching sessions check the organization and private key .."
   end
 
   # A call to schedule a session
@@ -166,22 +140,21 @@ class Innowhite
     desc = params[:description]
     room_id = set_room_id
 
-    address = join_room_helper(@server_address,@org_name, room_id, user,true)
-    create_schedule(room_id, user, tags,desc, @parent_org, address,start_time,end_time, time_zone)
+    address = join_room_helper(@server_address, @org_name, room_id, user, true)
+    create_schedule(room_id, user, tags, desc, @parent_org, address, start_time, end_time, time_zone)
   end
 
-  def create_schedule(room_id,user,tags,desc, parent_org,address, start_time, end_time, time_zone)
+  def create_schedule(room_id, user, tags, desc, parent_org, address, start_time, end_time, time_zone)
     checksum_tmp = "parentOrg=#{parent_org}&orgName=#{parent_org}"
     checksum = generating_checksum(URI.escape(checksum_tmp))
-    address = join_room_helper(@server_address,@org_name, room_id, user,true)
-    res = RestClient.post("#{@api_address}create_schedule_meeting",
-      {:roomId => room_id, :user => user, :tags => tags,:desc => desc,:startTime => start_time,
-        :endTime => end_time, :timeZone => time_zone,
-        :parentOrg => parent_org, :address => address, :orgName => parent_org,
-        :checksum => checksum
-        }
+    address = join_room_helper(@server_address, @org_name, room_id, user, true)
+    RestClient.post("#{@api_address}create_schedule_meeting",
+                          {:roomId => room_id, :user => user, :tags => tags, :desc => desc, :startTime => start_time,
+                           :endTime => end_time, :timeZone => time_zone,
+                           :parentOrg => parent_org, :address => address, :orgName => parent_org,
+                           :checksum => checksum
+                          }
     )
-    return res
   end
 
   def get_scheduled_list(params={})
@@ -194,24 +167,24 @@ class Innowhite
     x = Nokogiri::XML(open(url))
     ids = [], start_at = [], end_at = [], zone = []
     desc = []
-    x.xpath('//web-session/session-id').each{|m| ids << m.text}
-    x.xpath('//web-session/session-desc').each{|m| desc << m.text}
-    x.xpath('//web-session/start-at').each{|m| start_at << m.text.to_time.to_i rescue 0}
-    x.xpath('//web-session/end-at').each{|m| end_at << m.text.to_time.to_i rescue 0}
-    x.xpath('//web-session/start-at').each{|m| zone << m.text.to_datetime.utc_offset rescue 0}
+    x.xpath('//web-session/session-id').each { |m| ids << m.text }
+    x.xpath('//web-session/session-desc').each { |m| desc << m.text }
+    x.xpath('//web-session/start-at').each { |m| start_at << m.text.to_time.to_i rescue 0 }
+    x.xpath('//web-session/end-at').each { |m| end_at << m.text.to_time.to_i rescue 0 }
+    x.xpath('//web-session/start-at').each { |m| zone << m.text.to_datetime.utc_offset rescue 0 }
 
     res = []
     ids.each_with_index do |id, index|
       res << {
-        :tags => tags, :orgName => @org_name,
-        :room_id => id,
-        :startTime => start_at[index], :timeZone => zone[index],
-        :endTime => end_at[index],
-        :moderatorName => "",
-        :room_desc => desc[index]
+          :tags => tags, :orgName => @org_name,
+          :room_id => id,
+          :startTime => start_at[index], :timeZone => zone[index],
+          :endTime => end_at[index],
+          :moderatorName => "",
+          :room_desc => desc[index]
       }
     end
-    return res
+    res
   end
 
 
@@ -220,8 +193,7 @@ class Innowhite
     par = url_generator(@parent_org, @org_name)
     url = URI.escape("#{@api_address}cancel_meeting?roomId=#{room_id}&#{par}&checksum=#{checksum}")
 
-    x = Nokogiri::XML(open(url))
-    return x.xpath("//success").map(&:text)
+    Nokogiri::XML(open(url)).xpath("//success").map(&:text)
   end
 
   def update_schedule(params = {})
@@ -233,48 +205,42 @@ class Innowhite
     desc = params[:description] if params[:description]
     tags = params[:tags]
 
-    res = RestClient.put("#{@api_address}update_schedule",
-      {:roomId => room_id, :tags => tags,:description => desc,
-        :parentOrg => @parent_org, :orgName => @org_name,
-        :checksum => checksum
-        }
+    RestClient.put("#{@api_address}update_schedule",
+                         {:roomId => room_id, :tags => tags, :description => desc,
+                          :parentOrg => @parent_org, :orgName => @org_name,
+                          :checksum => checksum
+                         }
     )
   end
 
 
-
   private
 
-  def url_generator(parent_org,org_name)
+  def url_generator(parent_org, org_name)
     url = "parentOrg=#{parent_org}&orgName=#{org_name}"
     return url
   end
+
   def main_cheksum(parent_org, org_name)
     checksum_tmp = url_generator(parent_org, org_name)
-    checksum = generating_checksum(URI.escape(checksum_tmp))
-    return checksum
+    generating_checksum(URI.escape(checksum_tmp))
   end
 
-  def join_room_helper(server_addr, org_name, room_id,user, is_teacher)
+  def join_room_helper(server_addr, org_name, room_id, user, is_teacher)
     action = "#{server_addr}JoinRoom?"
     address = "parentOrg=#{@parent_org}&orgName=#{org_name}&roomId=#{room_id}&user=#{user}&roomLeader=#{is_teacher}"
-
-    checksum = address
-    pp "address = #{address}"
-    pp "checksum = #{checksum}"
-    return "#{action}#{address}&checksum=#{generating_checksum(checksum)}"
+    "#{action}#{address}&checksum=#{generating_checksum(address)}"
   end
 
   def generating_checksum(params)
     Digest::SHA1.hexdigest(params+@private_key)
   end
 
-  def generate_checksum(parent_org, org_name,user_name)
-    Digest::SHA1.hexdigest(generate_information_url(parent_org, org_name,user_name))
+  def generate_checksum(parent_org, org_name, user_name)
+    Digest::SHA1.hexdigest(generate_information_url(parent_org, org_name, user_name))
   end
 
-  def generate_information_url(parent_org, org_name,user_name)
+  def generate_information_url(parent_org, org_name, user_name)
     "parentOrg=#{parent_org}&orgName=#{org_name}&user=#{user_name}#{@private_key}"
   end
-
 end

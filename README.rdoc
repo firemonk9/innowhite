@@ -81,9 +81,9 @@ Schedule a session :
   
   Arguments (as a Hash) :
   a. :tags   (optional) 
-  b. :startTime (format should be in milliseconds)
+  b. :startTime (format should be in seconds)
   c. :timeZone (GMT time zone )  (ex : +1, +2) 
-  d. :endTime (format should be in milliseconds)
+  d. :endTime (format should be in seconds)
   e. :user
   f. :description
   
@@ -133,11 +133,11 @@ Get the scheduled sessions
   Return Value:
   a. Tags   (optional)
   b. orgName  (optional)
-  c. Start time (format should be in milliseconds) 
+  c. Start time (format should be in seconds)
   d. Time zone (GMT time zone )  (ex : +1, +2)
-  e. End time (format should be in milliseconds)
-  f. Moderator name
-  g. Room Description
+  e. End time (format should be in seconds)
+  f. Room Description
+  g. Moderator name
 
 
 

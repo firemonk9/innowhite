@@ -38,10 +38,8 @@ class Innowhite
   def get_sessions(params = {})
     temp = url_generator(@parent_org, @org_name)
     checksum = generating_checksum(URI.escape(temp))
-
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}list_sessions?#{tmp}&checksum=#{checksum}")
-
     JSON::parse(RestClient.get(url, :accept => :json))
 
     rescue
@@ -58,6 +56,7 @@ class Innowhite
         room_id,
         params[:user],
         true)
+
     create_schedule(
         room_id,
         params[:user],
@@ -87,7 +86,6 @@ class Innowhite
   def get_scheduled_list(params={})
     checksum = main_cheksum(@parent_org, @org_name)
     par = url_generator(@parent_org, @org_name)
-
     url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}&user=#{params[:user]}")
     JSON::parse(RestClient.get(url, :accept => :json))
   end

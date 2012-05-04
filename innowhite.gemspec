@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{innowhite}
-  s.version = "1.1.0"
+  s.version = "1.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{bainur}]
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Gem for Innowhite Api}
   s.add_dependency 'nokogiri', '~> 1.4.4'
   s.add_dependency 'rest-client', '~> 1.6.7'
+  s.add_development_dependency "rspec", "~> 1.3.4"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3

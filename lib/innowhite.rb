@@ -8,17 +8,6 @@ class Innowhite
 
   def initialize
     load_settings
-    #@mod_name = mod_name.gsub(/ /,'')
-    #@org_name = org_name.nil? ? @parent_org : org_name
-  end
-
-  def load_settings
-    settings = YAML.load_file('config/innowhite.yml')# if RAILS_ENV == "development"
-    @server_address = settings["innowhite"]["server_address"]
-    @api_address = settings["innowhite"]["api_address"]
-    @private_key = settings["innowhite"]["private_key"]
-    @parent_org = settings["innowhite"]["organization"]
-    @org_name = @parent_org
   end
 
   def create_room(params = {})
@@ -36,7 +25,7 @@ class Innowhite
   end
 
   def get_sessions(params = {})
-    temp = url_generator(@parent_org, @org_name)
+    temp = url_generator(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
     checksum = generating_checksum(URI.escape(temp))
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}list_sessions?#{tmp}&checksum=#{checksum}")
@@ -52,7 +41,7 @@ class Innowhite
 
     room_id = get_room_id
     address = join_room_url(
-        @org_name,
+        parent[:orgName] || @org_name,
         room_id,
         params[:user],
         true)
@@ -62,7 +51,7 @@ class Innowhite
         params[:user],
         params[:tags],
         params[:description],
-        @parent_org,
+        params[:parentOrg] || @parent_org,
         address,
         params[:startTime],
         params[:endTime],
@@ -70,7 +59,7 @@ class Innowhite
   end
 
   def past_sessions(params = {})
-    temp = url_generator(@parent_org, @org_name)
+    temp = url_generator(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
     checksum = generating_checksum(URI.escape(temp))
 
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
@@ -84,8 +73,8 @@ class Innowhite
   end
 
   def get_scheduled_list(params={})
-    checksum = main_cheksum(@parent_org, @org_name)
-    par = url_generator(@parent_org, @org_name)
+    checksum = main_cheksum(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
+    par = url_generator(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
     url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}&user=#{params[:user]}")
     JSON::parse(RestClient.get(url, :accept => :json))
   end
@@ -116,6 +105,14 @@ class Innowhite
   end
 
   protected
+    def load_settings
+      settings = YAML.load_file('config/innowhite.yml')# if RAILS_ENV == "development"
+      @server_address = settings["innowhite"]["server_address"]
+      @api_address = settings["innowhite"]["api_address"]
+      @private_key = settings["innowhite"]["private_key"]
+      @parent_org = settings["innowhite"]["organization"]
+      @org_name = @parent_org
+    end
 
     def create_schedule(room_id, user, tags, desc, parent_org, address, start_time, end_time, time_zone)
       checksum = generating_checksum(URI.escape(url_generator(parent_org, parent_org)))

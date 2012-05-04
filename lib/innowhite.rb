@@ -20,8 +20,7 @@ class Innowhite
   def join_meeting(room_id, user)
     url = "#{@api_address}exist_session?roomId=#{room_id}"
     doc = Nokogiri::XML(open(url))
-    raise "Room is not exist / Expired" if doc.text.blank?
-    join_room_url(@org_name, room_id, user, false)
+    doc.text.blank? ? nil : join_room_url(@org_name, room_id, user, false)
   end
 
   def get_sessions(params = {})

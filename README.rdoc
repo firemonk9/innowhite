@@ -140,11 +140,6 @@ Get the scheduled sessions
   g. Moderator name
 
 
-
-
-
-
-
 Cancel scheduled session
   Cancel the scheduled session.
 
@@ -156,9 +151,6 @@ Cancel scheduled session
 
   Return Value:
   a. True or False
-
-
-
 
 
 
@@ -180,7 +172,6 @@ Update a scheduled session :
   a. True or False
 
 
-TO DO :
 
 Get Meeting Play back Recording URL :
   Returns the video playback URL.

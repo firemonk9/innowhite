@@ -26,8 +26,7 @@ describe Innowhite do
     end
 
     it "incorrect" do
-      v = @i.join_meeting(-1, "toto")
-      (v=~ /JoinRoom/) == nil
+      @i.join_meeting(-1, "toto").nil?
     end
   end
 
@@ -98,4 +97,6 @@ describe Innowhite do
       @i.update_schedule(:room_id => -1, :description => "huhu")
     end
   end
+
+  it "get_video"
 end

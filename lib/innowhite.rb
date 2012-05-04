@@ -14,7 +14,7 @@ class Innowhite
     room_id = get_room_id
     address = join_room_url(@org_name, room_id, params[:user], true)
     res = create_room_info(room_id, params[:user], params[:tags], params[:desc], @org_name, address)
-    res.include?("Missing") ? "Failed to fetch, maybe you have entered wrong username / organization name .." : {:room_id => room_id, :address => address}
+    res.include?("Missing") ? {"errors" => "Failed to fetch, maybe you have entered wrong username / organization name .."} : {"room_id" => room_id, "address" => address}
   end
 
   def join_meeting(room_id, user)
@@ -31,13 +31,10 @@ class Innowhite
     JSON::parse(RestClient.get(url, :accept => :json))
 
     rescue
-      "Error fetching sessions check the organization and private key .."
+      {"errors" => "Error fetching sessions check the organization and private key .."}
   end
 
   def schedule_meeting(params = {})
-    params[:startTime] = params[:startTime].to_i  if params[:startTime].is_a?(DateTime) || params[:startTime].is_a?(Time)
-    params[:endTime] = params[:endTime].to_i  if params[:endTime].is_a?(DateTime) || params[:endTime].is_a?(Time)
-
     room_id = get_room_id
     address = join_room_url(
         parent[:orgName] || @org_name,
@@ -64,11 +61,10 @@ class Innowhite
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}past_sessions?#{tmp}&checksum=#{checksum}")
     res = JSON::parse(RestClient.get(url, :accept => :json))
-
     res.map {|o| o.update("video_url" => "http://cplayback1.innowhite.com:8080/tomcat.jsp?vid=#{getRecordingURL(o["id"])}")}
 
     rescue
-      "Error fetching sessions check the organization and private key .."
+      { "errors" => "Error fetching sessions check the organization and private key .." }
   end
 
   def get_scheduled_list(params={})

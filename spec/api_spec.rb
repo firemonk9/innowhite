@@ -5,11 +5,11 @@ describe Innowhite do
     #@config = YAML::load(File.open(File.join(File.dirname(__FILE__), "config.yml")))
     @i = Innowhite.new
   end
-  
+
   describe "create_room" do
     it "correct" do
       v = @i.create_room(:user => "jb")
-      v.is_a?(Hash) && v.has_key?(:room_id) && v.has_key?(:address)
+      v.is_a?(Hash) && !v.has_key?("errors")
     end
 
     it "incorrect" do
@@ -21,7 +21,7 @@ describe Innowhite do
   describe "join_room" do
     it "correct" do
       v = @i.create_room(:user => "jb")
-      v = @i.join_meeting(v[:room_id], "toto")
+      v = @i.join_meeting(v["room_id"], "toto")
       (v=~ /JoinRoom/) != nil
     end
 
@@ -35,8 +35,14 @@ describe Innowhite do
       @i.schedule_meeting(:user => "jb", :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 1.days).to_i, :timeZone => 2)
     end
 
-    it "incorrect" do
-      !@i.schedule_meeting(:user => "jb", :description => "???")
+    describe "incorrect" do
+      it "wrong organization name" do
+        @i.schedule_meeting(:user => "jb", :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 1.days).to_i, :timeZone => 2)
+      end
+
+      it "miss params" do
+        !@i.schedule_meeting(:user => "jb", :description => "???")
+      end
     end
   end
 
@@ -79,7 +85,7 @@ describe Innowhite do
   describe "cancel_meeting" do
     it "correct" do
       v = @i.create_room(:user => "jb")
-      @i.cancel_meeting(v[:room_id])
+      @i.cancel_meeting(v["room_id"])
     end
 
     it "incorrect" do
@@ -90,7 +96,7 @@ describe Innowhite do
   describe "update_schedule" do
     it "correct" do
       v = @i.create_room(:user => "jb")
-      @i.update_schedule(:room_id => v[:room_id], :description => "huhu")
+      @i.update_schedule(:room_id => v["room_id"], :description => "huhu")
     end
 
     it "incorrect" do

@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = %q{Innowhite Api}
   s.email = %q{inoe.bainur@gmail.com}
   s.extra_rdoc_files = [%q{README.rdoc}, %q{lib/innowhite.rb}]
-  s.files = [%q{README.rdoc}, %q{Rakefile}, %q{lib/innowhite.rb}, %q{Manifest}, %q{innowhite.gemspec}]
+  s.files = [%q{README.rdoc}, %q{Rakefile}, %q{lib/innowhite.rb}, %q{innowhite.gemspec}]
   s.homepage = %q{http://github.com/bainur/innowhite}
   s.rdoc_options = [%q{--line-numbers}, %q{--inline-source}, %q{--title}, %q{Innowhite}, %q{--main}, %q{README.rdoc}]
   s.require_paths = [%q{lib}]

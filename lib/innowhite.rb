@@ -37,7 +37,7 @@ class Innowhite
   def schedule_meeting(params = {})
     room_id = get_room_id
     address = join_room_url(
-        parent[:orgName] || @org_name,
+        params[:orgName] || @org_name,
         room_id,
         params[:user],
         true)
@@ -60,8 +60,7 @@ class Innowhite
 
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}past_sessions?#{tmp}&checksum=#{checksum}")
-    res = JSON::parse(RestClient.get(url, :accept => :json))
-    res.map {|o| o.update("video_url" => "http://cplayback1.innowhite.com:8080/tomcat.jsp?vid=#{getRecordingURL(o["id"])}")}
+    JSON::parse(RestClient.get(url, :accept => :json))
 
     rescue
       { "errors" => "Error fetching sessions check the organization and private key .." }
@@ -70,7 +69,7 @@ class Innowhite
   def get_scheduled_list(params={})
     checksum = main_cheksum(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
     par = url_generator(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
-    url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}&user=#{params[:user]}")
+    url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}}")
     JSON::parse(RestClient.get(url, :accept => :json))
   end
 

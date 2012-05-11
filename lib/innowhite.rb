@@ -4,6 +4,16 @@ require 'rest-client'
 
 class Innowhite
 
+  @@errors = {
+    :user_miss =>         [1, "user value missed"],
+    :fetch_fail =>        [2, "Failed to fetch, maybe you have entered wrong username"],
+    :room_miss =>         [3, "room not set"],
+    :description_miss =>  [4, "description value not set"],
+    :start_time =>        [5, "startTime value missed"],
+    :end_time =>          [6, "endTime value missed"],
+    :time_zone =>         [7, "timeZone value missed"],
+  }
+
   attr_accessor :mod_name, :org_name, :sub, :server_address, :private_key
 
   def initialize
@@ -11,16 +21,18 @@ class Innowhite
   end
 
   def create_room(params = {})
+    return err(1, "User value missed") if params[:user].blank?
     room_id = get_room_id
     address = join_room_url(@org_name, room_id, params[:user], true)
     res = create_room_info(room_id, params[:user], params[:tags], params[:desc], @org_name, address)
-    res.include?("Missing") ? {"errors" => "Failed to fetch, maybe you have entered wrong username / organization name .."} : {"room_id" => room_id, "address" => address}
+    res.include?("Missing") ? err(*@@errors[:fetch_fail]) : data({"room_id" => room_id, "address" => address})
   end
 
   def join_meeting(room_id, user)
+    return err(*@@errors[:user_miss]) if user.nil?
+    return err(*@@errors[:room_miss]) if room_id.nil?
     url = "#{@api_address}exist_session?roomId=#{room_id}"
-    doc = Nokogiri::XML(open(url))
-    doc.text.blank? ? nil : join_room_url(@org_name, room_id, user, false)
+    Nokogiri::XML(open(url)).text.blank? ? err(-1, "Unknow") : data(join_room_url(@org_name, room_id, user, false))
   end
 
   def get_sessions(params = {})
@@ -28,13 +40,20 @@ class Innowhite
     checksum = generating_checksum(URI.escape(temp))
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}list_sessions?#{tmp}&checksum=#{checksum}")
-    JSON::parse(RestClient.get(url, :accept => :json))
+    data(JSON::parse(RestClient.get(url, :accept => :json)))
 
-    rescue
-      {"errors" => "Error fetching sessions check the organization and private key .."}
+  rescue
+    err(*@@errors[:fetch_fail])
   end
 
   def schedule_meeting(params = {})
+    return err(*@@errors[:user_miss]) if !params[:user] || params[:user].blank?
+    return err(*@@errors[:description_miss]) if !params[:description] || params[:description].empty?
+
+    return err(*@@errors[:start_time]) if !params[:startTime] || params[:startTime].blank?
+    return err(*@@errors[:end_time]) if !params[:endTime] || params[:endTime].blank?
+    return err(*@@errors[:time_zone]) if !params[:timeZone] || params[:timeZone].blank?
+
     room_id = get_room_id
     address = join_room_url(
         params[:orgName] || @org_name,
@@ -42,7 +61,7 @@ class Innowhite
         params[:user],
         true)
 
-    create_schedule(
+    data(create_schedule(
         room_id,
         params[:user],
         params[:tags],
@@ -51,7 +70,7 @@ class Innowhite
         address,
         params[:startTime],
         params[:endTime],
-        params[:timeZone]) == "true"
+        params[:timeZone]) == "true")
   end
 
   def past_sessions(params = {})
@@ -60,24 +79,24 @@ class Innowhite
 
     tmp = "#{temp}&user=#{params[:user]}&tags=#{params[:tags]}"
     url = URI.escape("#{@api_address}past_sessions?#{tmp}&checksum=#{checksum}")
-    JSON::parse(RestClient.get(url, :accept => :json))
+    data(JSON::parse(RestClient.get(url, :accept => :json)))
 
     rescue
-      { "errors" => "Error fetching sessions check the organization and private key .." }
+      err(*@@errors[:fetch_fail])
   end
 
   def get_scheduled_list(params={})
     checksum = main_cheksum(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
     par = url_generator(params[:parentOrg] || @parent_org, params[:orgName] || @org_name)
-    url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}}")
-    JSON::parse(RestClient.get(url, :accept => :json))
+    url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{params[:tags]}&user=#{params[:user]}")
+    data(JSON::parse(RestClient.get(url, :accept => :json)))
   end
 
   def cancel_meeting(room_id)
     checksum = main_cheksum(@parent_org, @org_name)
     par = url_generator(@parent_org, @org_name)
     url = URI.escape("#{@api_address}cancel_meeting?roomId=#{room_id}&#{par}&checksum=#{checksum}")
-    Nokogiri::XML(open(url)).xpath("//success").text == "true"
+    data(Nokogiri::XML(open(url)).xpath("//success").text == "true")
   end
 
   def update_schedule(params = {})
@@ -85,20 +104,29 @@ class Innowhite
     params[:startTime] = params[:startTime].to_i  if !params[:startTime].blank? && (params[:startTime].is_a?(DateTime) || params[:startTime].is_a?(Time))
     params[:endTime] = params[:endTime].to_i  if !params[:endTime].blank? && (params[:endTime].is_a?(DateTime) || params[:endTime].is_a?(Time))
 
-    Nokogiri::XML(RestClient.put("#{@api_address}update_schedule",
+    data(Nokogiri::XML(RestClient.put("#{@api_address}update_schedule",
                              {:roomId => params[:room_id], :tags => params[:tags], :description => params[:description],
                               :parentOrg => @parent_org, :orgName => @org_name,
                               :checksum => checksum, :startTime => params[:startTime],
                               :endTime => params[:endTime], :timeZone => params[:timeZone]
                              }
-        )).xpath("//success").text == "true"
+        )).xpath("//success").text == "true")
   end
 
   def getRecordingURL(room_id)
-    Nokogiri.parse(RestClient.get("#{@server_address}PlayBackServlet?room_id=#{room_id}")).css("webMpath").text.gsub(/.webm$/, "")
+    v = Nokogiri.parse(RestClient.get("#{@server_address}PlayBackServlet?room_id=#{room_id}"))
+    { "webm" => v.css("webMpath").text.gsub(/.webm$/, ""), "mp4" => v.css("mp4path").text}
   end
 
   protected
+    def err(code, message)
+      {"errors" => {"message" => message, "code" => code}}.with_indifferent_access
+    end
+
+    def data(values)
+      {"data" => values}.with_indifferent_access
+    end
+
     def load_settings
       settings = YAML.load_file('config/innowhite.yml')# if RAILS_ENV == "development"
       @server_address = settings["innowhite"]["server_address"]

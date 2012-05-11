@@ -2,9 +2,9 @@
 
 Gem::Specification.new do |s|
   s.name = %q{innowhite}
-  s.version = "1.1.3"
+  s.version = "1.1.6.1"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new(">= 1.3") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{bainur}]
   s.date = %q{2011-08-11}
   s.description = %q{Innowhite Api}

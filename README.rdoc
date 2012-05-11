@@ -184,3 +184,9 @@ Get Meeting Play back Recording URL :
 
   Return Value :
   a. URL
+
+
+
+Returned data
+
+All results returns as Hash with indifferent access. :data key contains result and :errors contains errors.

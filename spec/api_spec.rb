@@ -22,38 +22,38 @@ describe Innowhite do
 
   describe "create_room" do
     it "correct" do
-      v = @i.create_room(:user => user)
+      v = @i.create_room(:server => "innowhite",:user => user)
       !v.has_key?("errors")
     end
 
     describe "incorrect" do
       it "user not set" do
-        v = @i.create_room
+        v = @i.create_room(:server => "innowhite")
         v.has_key?("errors") && v["errors"]["code"] == 1
       end
 
-      it "wrong user set" do
-        v = @i.create_room
-        v.has_key?("errors") && v["errors"]["code"] == 2
-      end
+      #it "wrong user set" do
+      #  v = @i.create_room(:server => "innowhite")
+      #  v.has_key?("errors") && v["errors"]["code"] == 2
+      #end
     end
   end
 
   describe "join_room" do
     it "correct" do
-      v = @i.create_room(:user => user)
-      v = @i.join_meeting(v[:data][:room_id], "toto")
+      v = @i.create_room(:user => user, :server => "innowhite")
+      v = @i.join_meeting("innowhite",v[:data][:room_id], "toto")
       !v["errors"]
     end
 
     describe "incorrect" do
       it "room id incorrect" do
-        v = @i.join_meeting(nil, "toto")
+        v = @i.join_meeting("innowhite", nil, "toto")
         v["errors"] && v["errors"]["code"] == 3
       end
 
       it "user incorrect" do
-        v = @i.join_meeting(1, nil)
+        v = @i.join_meeting("innowhite", 1, nil)
         v["errors"] && v["errors"]["code"] == 1
       end
     end
@@ -62,12 +62,12 @@ describe Innowhite do
   describe "get_sessions" do
     describe "correct" do
       it "get by user" do
-        v = @i.get_sessions()
+        v = @i.get_sessions(:server => "innowhite")
         !v[:data].blank?
       end
 
       it "get by tags" do
-        v = @i.get_sessions(:tags => "yoyo")
+        v = @i.get_sessions(:server => "innowhite", :tags => "yoyo")
         v[:data] && v[:data].length == 2
       end
     end
@@ -80,33 +80,33 @@ describe Innowhite do
 
   describe "schedule_meeting" do
     it "correct" do
-      v = @i.schedule_meeting(:user => user, :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 1.days).to_i, :timeZone => 2)
+      v = @i.schedule_meeting(:server => "innowhite", :user => user, :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 1.days).to_i, :timeZone => 2)
       v["data"]
     end
 
     describe "incorrect" do
       it 'user value missed' do
-        v = @i.schedule_meeting()
+        v = @i.schedule_meeting(:server => "innowhite")
         v[:errors][:code] == 1
       end
 
       it 'description value missed' do
-        v = @i.schedule_meeting(:user => user)
+        v = @i.schedule_meeting(:server => "innowhite", :user => user)
         v[:errors][:code] == 4
       end
 
       it 'start time value missed' do
-        v = @i.schedule_meeting(:user => user, :description => "???")
+        v = @i.schedule_meeting(:server => "innowhite", :user => user, :description => "???")
         v[:errors][:code] == 5
       end
 
       it 'end time value missed' do
-        v = @i.schedule_meeting(:user => user, :description => "???", :start_time => DateTime.now.to_i)
+        v = @i.schedule_meeting(:server => "innowhite", :user => user, :description => "???", :start_time => DateTime.now.to_i)
         v[:errors][:code] == 6
       end
 
       it 'time zone value missed' do
-        v = @i.schedule_meeting(:user => user, :description => "???", :start_time => DateTime.now.to_i, :end_time => DateTime.now.to_i)
+        v = @i.schedule_meeting(:server => "innowhite", :user => user, :description => "???", :start_time => DateTime.now.to_i, :end_time => DateTime.now.to_i)
         v[:errors][:code] == 7
       end
     end
@@ -114,7 +114,7 @@ describe Innowhite do
 
   describe "past_sessions" do
     it "correct by user" do
-      v = @i.past_sessions(:user => user2)
+      v = @i.past_sessions(:server => "innowhite", :user => user2)
       !v.has_key?("errors")
     end
     #
@@ -124,14 +124,14 @@ describe Innowhite do
     #end
 
     it "correct without params" do
-      v = @i.past_sessions()
+      v = @i.past_sessions(:server => "innowhite")
       v[:data]
     end
   end
 
   describe "get_scheduled_list" do
     it "correct by user" do
-      v = @i.get_scheduled_list(:user => user2)
+      v = @i.get_scheduled_list(:server => "innowhite", :user => user2)
       !v.has_key?("errors")
     end
     #
@@ -141,30 +141,30 @@ describe Innowhite do
     #end
 
     it "correct without params" do
-      v = @i.get_scheduled_list()
+      v = @i.get_scheduled_list(:server => "innowhite")
       v[:data]
     end
   end
 
   describe "cancel_meeting" do
     it "correct" do
-      v = @i.create_room(:user => user)
-      @i.cancel_meeting(v[:data][:room_id])[:data]
+      v = @i.create_room(:server => "innowhite", :user => user)
+      @i.cancel_meeting("innowhite", v[:data][:room_id])[:data]
     end
 
     it "incorrect" do
-      !@i.cancel_meeting(-1)[:data]
+      !@i.cancel_meeting("innowhite", -1)[:data]
     end
   end
 
   describe "update_schedule" do
     it "correct" do
-      v = @i.create_room(:user => user)
-      @i.update_schedule(:room_id => v["room_id"], :description => "huhu")[:data]
+      v = @i.create_room(:server => "innowhite", :user => user)
+      @i.update_schedule(:server => "innowhite", :room_id => v["room_id"], :description => "huhu")[:data]
     end
 
     it "incorrect" do
-      !@i.update_schedule(:room_id => -1, :description => "huhu")[:data]
+      !@i.update_schedule(:server => "innowhite", :room_id => -1, :description => "huhu")[:data]
     end
   end
 

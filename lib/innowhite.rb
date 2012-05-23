@@ -112,7 +112,7 @@ class Innowhite
   end
 
   def getRecordingURL(room_id)
-    url = "#{@api_address}api_get_recording_urls?#{{:room_id => room_id}.to_param}}"
+    url = "#{@api_address}api_get_recording_urls?#{{:room_id => room_id}.to_param}"
     data(request("get", url))
   end
 

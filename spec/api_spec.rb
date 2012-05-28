@@ -149,22 +149,22 @@ describe Innowhite do
   describe "cancel_meeting" do
     it "correct" do
       v = @i.create_room(:user => user)
-      @i.cancel_meeting(v[:data][:room_id])[:data]
+      @i.cancel_meeting(v[:data][:room_id])
     end
 
     it "incorrect" do
-      !@i.cancel_meeting(-1)[:data]
+      !@i.cancel_meeting(-1)
     end
   end
 
   describe "update_schedule" do
     it "correct" do
       v = @i.create_room(:user => user)
-      @i.update_schedule(:room_id => v["room_id"], :description => "huhu")[:data]
+      @i.update_schedule(:room_id => v["room_id"], :description => "huhu")
     end
 
     it "incorrect" do
-      !@i.update_schedule(:room_id => -1, :description => "huhu")[:data]
+      !@i.update_schedule(:room_id => -1, :description => "huhu")
     end
   end
 

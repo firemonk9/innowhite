@@ -25,7 +25,6 @@ class Innowhite
     room_id = get_room_id(params[:user])
     return room_id[:errors] if room_id.has_key?(:errors)
     res = create_room_info(room_id[:data], params[:user], params[:tags], params[:desc], @org_name)
-    $stdout << res.inspect
     res[:status] ? data({"room_id" => room_id[:data], "address" => res[:data]}) : res[:errors]
   end
 
@@ -60,7 +59,7 @@ class Innowhite
     room_id = get_room_id(params[:user])
     return room_id[:errors] if room_id.has_key?(:errors)
 
-    create_schedule(
+    v = create_schedule(
         room_id,
         params[:user],
         params[:tags],
@@ -69,6 +68,8 @@ class Innowhite
         params[:startTime],
         params[:endTime],
         params[:timeZone])
+
+    v[:errors].blank? ? v[:status] : v[:errors]
   end
 
   def past_sessions(params = {})
@@ -153,7 +154,7 @@ class Innowhite
                              :checksum => checksum,  :roomLeader => true,
                              :key => @private_key
                             }
-      )[:status]
+      )
     end
 
     def create_room_info(room_id, user, tags, desc, parent_org)
@@ -176,7 +177,6 @@ class Innowhite
       else
         RestClient.send(method, url, {}, :accept => :json)
       end
-      $stdout << k.inspect
       JSON::parse(k).with_indifferent_access
     end
 

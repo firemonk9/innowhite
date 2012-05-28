@@ -1,0 +1,12 @@
+build and publish :
+
+gem build innowhite_api.gemspec
+
+The above command will create gem file : innowhite_api<version>.gem
+Use above file and invoke push command.
+
+
+gem push innowhite_api-1.1.7.1.gem 
+
+
+

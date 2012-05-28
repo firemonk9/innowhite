@@ -59,7 +59,7 @@ class Innowhite
     room_id = get_room_id(params[:user])
     return room_id[:errors] if room_id.has_key?(:errors)
 
-    v = create_schedule(
+    create_schedule(
         room_id,
         params[:user],
         params[:tags],
@@ -68,8 +68,6 @@ class Innowhite
         params[:startTime],
         params[:endTime],
         params[:timeZone])
-
-    v[:errors].blank? ? v[:status] : v[:errors]
   end
 
   def past_sessions(params = {})

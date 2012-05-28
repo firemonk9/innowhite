@@ -85,6 +85,11 @@ describe Innowhite do
     end
 
     describe "incorrect" do
+      it "incorrect dates range" do
+        v = @i.schedule_meeting(:user => user, :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 3.days).to_i, :timeZone => 2)
+        v[:errors][:code] == -1
+      end
+
       it 'user value missed' do
         v = @i.schedule_meeting()
         v[:errors][:code] == 1

@@ -25,7 +25,7 @@ class Innowhite
     room_id = get_room_id(params[:user])
     return room_id[:errors] if room_id.has_key?(:errors)
     res = create_room_info(room_id[:data], params[:user], params[:tags], params[:desc], @org_name)
-    res[:status] ? data({"room_id" => room_id[:data], "address" => res[:data]}) : res[:errors]
+    res[:status] ? data({"room_id" => room_id[:data], "address" => res[:data], "credentials" => res[:credentials]}) : res[:errors]
   end
 
   def join_meeting(room_id, user)

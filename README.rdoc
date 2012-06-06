@@ -36,6 +36,7 @@ Create new session :
   Return value :
   a. Room Id
   b. URL  (this URL will be passed to user so that he needs to be redirected to open in new page.)
+  (c.) Pass for created user (how login use :user argument)
 
 
 

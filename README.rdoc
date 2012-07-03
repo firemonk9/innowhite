@@ -6,7 +6,7 @@ Install innowhite gem with RubyGems
 gem install innowhite
 or add this to your Gemfile if you use Bundler:
 
-gem innowhite_api
+gem "innowhite", :git => "git://github.com/firemonk9/innowhite.git"
 
 Step 2:
 Place the innowhite.yml file in the config directory.

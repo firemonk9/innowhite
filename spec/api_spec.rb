@@ -165,7 +165,7 @@ describe Innowhite do
   describe "update_schedule" do
     it "correct" do
       v = @i.create_room(:user => user)
-      @i.update_schedule(:room_id => v["room_id"], :description => "huhu")
+      @i.update_schedule(:room_id => v[:data]["room_id"], :description => "huhu")
     end
 
     it "incorrect" do

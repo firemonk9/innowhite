@@ -6,7 +6,7 @@ Install innowhite gem with RubyGems
 gem install innowhite
 or add this to your Gemfile if you use Bundler:
 
-gem innowhite_api
+gem "innowhite", :git => "git://github.com/firemonk9/innowhite.git"
 
 Step 2:
 Place the innowhite.yml file in the config directory.
@@ -28,7 +28,7 @@ Create new session :
   a. :user => the name of the moderator (ex. "John")
   b. :tags => (optional). Example : (math 101, calculus, integration)
   c. :desc => (optional) Description of the room. (ex: Definite Integrals by John)
-  d. :cb => (mandatory) Server name (ex: "innowhite" or "testinnowhite")
+  
 
   Request Command :
   innowhite.create_room({:cb => "innowhite", :user => "bainur"}). Ex : innowhite.create_room({:cb => "innowhite", :user => "bainur", :tags => "testing, room testing", :desc => "This is only testing for the room"})

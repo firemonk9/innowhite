@@ -94,7 +94,14 @@ Schedule a session :
     innowhite.schedule_meeting({})
 
   Return Value :
-  a. True or False
+    a. Session id
+    b. Organization name
+    c. All tags associated with this room.
+    d. Room Created by.
+    e. Room start time.
+    f. Room end time.
+    g. Description
+    h. Time zone
 
 
 
@@ -141,6 +148,7 @@ Get the scheduled sessions
   e. End time (format should be in seconds)
   f. Room Description
   g. Moderator name
+  h. Session ID
 
 
 Cancel scheduled session

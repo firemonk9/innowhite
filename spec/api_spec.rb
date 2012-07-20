@@ -81,7 +81,7 @@ describe Innowhite do
   describe "schedule_meeting" do
     it "correct" do
       v = @i.schedule_meeting(:user => user, :description => "???", :parentOrg => "ZZZ", :startTime => (DateTime.now - 2.days).to_i, :endTime => (DateTime.now - 1.days).to_i, :timeZone => 2)
-      v["data"]
+      !v["data"].nil?
     end
 
     describe "incorrect" do

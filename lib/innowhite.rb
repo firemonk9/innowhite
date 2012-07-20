@@ -60,7 +60,7 @@ class Innowhite
     return room_id[:errors] if room_id.has_key?(:errors)
 
     create_schedule(
-        room_id,
+        room_id[:data],
         params[:user],
         params[:tags],
         params[:description],

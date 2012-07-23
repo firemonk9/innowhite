@@ -102,6 +102,7 @@ Schedule a session :
     f. Room end time.
     g. Description
     h. Time zone
+    i. Admin url
 
 
 

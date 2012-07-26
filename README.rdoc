@@ -170,7 +170,7 @@ Update a scheduled session :
   Updating the exist scheduled session.
   
   Arguments (as a Hash) :
-  a. :room_id   (mandatory)
+  a. :room_id   (should be string) (mandatory)
   b. :startTime (format should be in milliseconds)  (optional)
   c. :timeZone (optional)
   d. :endTime (format should be in milliseconds) (optional)
@@ -188,7 +188,7 @@ Update a scheduled session :
 Get Meeting Play back Recording URL :
   Returns the video playback URL.
 
-  a.  room_id  (mandatory)
+  a.  room_id  (should be string) (mandatory)
  
   Request Command :
     innowhite.getRecordingURL(room_id)

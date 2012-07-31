@@ -3,10 +3,10 @@ Getting Started
 Step 1:
 Install innowhite gem with RubyGems
 
-gem install innowhite
+    gem install innowhite
 or add this to your Gemfile if you use Bundler:
 
-gem "innowhite", :git => "git://github.com/firemonk9/innowhite.git"
+    gem "innowhite", :git => "git://github.com/firemonk9/innowhite.git"
 
 Step 2:
 Place the innowhite.yml file in the config directory.
@@ -24,180 +24,186 @@ Then we could access the available methods from the instance :
 Create new session :
   Create new room and get its room url to access it.
 
-  Arguments (as a Hash) :
-  a. :user => the name of the moderator (ex. "John")
-  b. :tags => (optional). Example : (math 101, calculus, integration)
-  c. :desc => (optional) Description of the room. (ex: Definite Integrals by John)
-  
+  Arguments (Mixed) :
+
+    (as a Variable) :
+        :fullName           (Required) (String) A moderator name.
+        :meetingName        (Required) (String) A name for the meeting.
+    (as a Hash) :
+        :meetingID      =>  (Optional) (String) A meeting ID that can be used to identify this meeting by the third party application. This must be unique to the server that you are calling. If you supply a non-unique meeting ID, you will still have a successful call, but will receive a warning message in the response. If you intend to use the recording feature, the meetingID shouldn't contain commas.
+        :attendeePW     =>  (Optional) (String) The password that will be required for attendees to join the meeting. This is optional, and if not supplied, BBB will assign a random password.
+        :moderatorPW    =>	(Optional) (String) The password that will be required for moderators to join the meeting or for certain administrative actions (i.e. ending a meeting). This is optional, and if not supplied, BBB will assign a random password.
+        :welcome        =>	(Optional) (String) A welcome message that gets displayed on the chat window when the participant joins. You can include keywords (%%CONFNAME%%, %%DIALNUM%%, %%CONFNUM%%) which will be substituted automatically. You can set a default welcome message on bigbluebutton.properties
+        :dialNumber     =>  (Optional) (String) The dial access number that participants can call in using regular phone. You can set a default dial number on bigbluebutton.properties
+        :voiceBridge    =>  (Optional) (String) Voice conference number that participants enter to join the voice conference. The default pattern for this is a 5-digit number, because in the default Asterisk configuration, this is the PIN that a dial-in user must enter to join the conference. If you want to change this pattern, you have to edit /etc/asterisk/bbb_extensions.conf. When using the default setup, we recommend you always pass a 5 digit voiceBridge parameter -- and have it begin with the digit '7' if you are using the default FreeSWITCH setup. Finally, if you don't pass a value for voiceBridge, then users will not be able to join a voice conference for the session. (see FAQ entry Users do not appear in listeners window).
+        :webVoice       =>  (Optional) (String) Voice conference alphanumberic that participants enter to join the voice conference.
+        :record         =>  (Optional) (String) Setting ‘record=true’ instructs the BigBlueButton server to record the media and events in the session for later playback. Available values are true or false. Default value is false.
+        :duration       =>  (Optional) (Number) The duration parameter allows to specify the number of minutes for the meeting's length. When the length of the meeting reaches the duration, BigBlueButton automatically ends the meeting. The default is 0, which means the meeting continues until the last person leaves or an end API calls is made with the associated meetingID.
+        :meta           =>  (Optional) (String) You can pass one or more metadata values for create a meeting. These will be stored by BigBlueButton and later retrievable via the getMeetingInfo call and getRecordings. Examples of meta parameters are meta_Presenter, meta_category, meta_LABEL, etc. All parameters are converted to lower case, so meta_Presenter would be the same as meta_PRESENTER.
 
   Request Command :
-  innowhite.create_room({:cb => "innowhite", :user => "bainur"}). Ex : innowhite.create_room({:cb => "innowhite", :user => "bainur", :tags => "testing, room testing", :desc => "This is only testing for the room"})
+    innowhite.create_room(meetingName, {}). Ex : innowhite.create_room("myname", {:record => true, :duration => 0})
 
   Return value :
-  a. Room Id
-  b. URL  (this URL will be passed to user so that he needs to be redirected to open in new page.)
-  (c.) Pass for created user (how login use :user argument)
+    :url            (String) Meeting URL for admin
+    :credentials    (Hash)   Credentials for other operations
 
-
-
+------------------------------------------------------------------------------------------------------------------------
 
 Join an existing session
   Joining the existing room and get its room url to access it.
 
-  Arguments :
-  a. room_id => (mandatory) The room id which want to join.
-  b. username => (mandatory) Username of the user who want to join the room.
+  Arguments (as a Variable) :
+    :fullName       (Required) (String) The full name that is to be used to identify this user to other conference attendees.
+    :meetingID 	    (Required) (String) The meeting ID that identifies the meeting you are attempting to join.
+    :password 	    (Required) (String) The password that this attendee is using. If the moderator password is supplied, he will be given moderator status (and the same for attendee password, etc)
 
   Request Command :
-    innowhite.join_meeting(room_id, username). Ex : innowhite.join_meeting(12345, "bainur")
+    innowhite.join_meeting(fullName, meetingID, password). Ex : innowhite.join_meeting("Abram Kusto", "y32u4gu2u", "my password")
   
-   Return value :
-  a. URL  (this URL will be passed to the user, the user needs to be redirected to open in new page.)   
+  Return value :
+    :url    (String)    Meeting URL for attendee
    
-
-
-
+------------------------------------------------------------------------------------------------------------------------
 
 Get the live sessions
   Get the list of existing sessions.
 
   Arguments (as a Hash) :
-  a. :tags (optional)
-  b. :user (optional)
+    :tags               =>  (Optional) (String) Tags, associated with some sessions.
+    :fullName           =>  (Optional) (String) Some user.
 
   Request Command :
-    innowhite.get_sessions({})
+    innowhite.get_sessions({}). Ex : innowhite.get_sessions(:tags => "dogs, cats")
 
   Return value :
-  a. RoomId
-  b. Room Description
-  c. All tags associated with this room.
-  d. Room Created by.
-  e. Room start time.
+    :meetingID      (String)
+    :description    (String)
+    :tags           (String) All tags associated with this room.
+    :createdBy      (String)
+    :beginTime      (String) Room start time
 
-
-
-
+------------------------------------------------------------------------------------------------------------------------
 
 Schedule a session :
   Scheduling new session.
   
   Arguments (as a Hash) :
-  a. :tags   (optional) 
-  b. :startTime (format should be in seconds)
-  c. :timeZone (GMT time zone )  (ex : +1, +2) 
-  d. :endTime (format should be in seconds)
-  e. :user
-  f. :description
-  
+
+    :fullName       =>  (Required) (String)
+    :startTime      =>  (Required) (Number(in seconds) or DateTime)
+    :endTime        =>  (Required) (Number(in seconds) or DateTime)
+    :timeZone       =>  (Required) (Number) (ex : +1, +2)
+    :description    =>  (Required) (String)
+    :tags           =>  (Optional) (String)
+
   Request Command :
     innowhite.schedule_meeting({})
 
   Return Value :
-    a. Session id
-    b. Organization name
-    c. All tags associated with this room.
-    d. Room Created by.
-    e. Room start time.
-    f. Room end time.
-    g. Description
-    h. Time zone
-    i. Admin url
+    :meetingID          (String)
+    :organizationName   (String)
+    :tags               (String)
+    :createdBy          (String)
+    :beginTime          (String)
+    :endTime            (String)
+    :timeZone           (String)
+    :description        (String)
+    :url                (String)    Meeting URL for admin
+    :credentials        (Hash)      Credentials for other operations
 
-
-
-
-
-
+------------------------------------------------------------------------------------------------------------------------
 
 Get the past sessions
   Get the list of past sessions.
 
   Arguments (as a Hash) :
-  a. :tags (optional)
-  b. :user (optional)
+    :tags               =>  (Optional) (String) Tags, associated with some sessions.
+    :fullName           =>  (Optional) (String) Some user.
+    :organizationName   =>  (Optional) (String) Some organization name.
 
   Request Command :
     innowhite.past_sessions({})
   
-
   Return Value :
-  a. tags   (optional)
-  b. orgName  (optional)
-  c. Moderator Name
-  d. Room Description
-  e. Link to play the video.
+    :meetingID          (String)
+    :organizationName   (String)
+    :createdBy          (String)
+    :description        (String)
+    :videoLinks         (Array[String])
+    :tags               (String)
 
-
-
+------------------------------------------------------------------------------------------------------------------------
 
 Get the scheduled sessions
   Get the list of scheduled sessions.
 
   Arguments (as a Hash) :
-  a. :tags (optional)
-  b. :user (optional)
+    :tags       =>  (Optional) (String) Tags, associated with some sessions.
+    :fullName   =>  (Optional) (String) Some user.
 
   Request Command :
     innowhite.get_scheduled_list({})
 
   Return Value:
-  a. Tags   (optional)
-  b. orgName  (optional)
-  c. Start time (format should be in seconds)
-  d. Time zone (GMT time zone )  (ex : +1, +2)
-  e. End time (format should be in seconds)
-  f. Room Description
-  g. Moderator name
-  h. Session ID
+    :meetingID          (String)
+    :organizationName   (String)
+    :tags               (String)
+    :createdBy          (String)
+    :beginTime          (String)
+    :endTime            (String)
+    :timeZone           (String)
+    :description        (String)
 
+------------------------------------------------------------------------------------------------------------------------
 
 Cancel scheduled session
   Cancel the scheduled session.
 
-  Arguments :
-  a. room_id (mandatory)
+  Arguments (as a Variable):
+    :meetingID  (Required) (String) The meeting ID that identifies the meeting you are attempting to end.
+    :password   (Required) (String) The moderator password for this meeting. You can not end a meeting using the attendee password.
 
   Request Command :
-    innowhite.cancel_meeting(room_id)
+    innowhite.cancel_meeting(meetingID, password)
 
   Return Value:
-  a. True or False
+    true or false
 
-
+------------------------------------------------------------------------------------------------------------------------
 
 Update a scheduled session :
   Updating the exist scheduled session.
-  
-  Arguments (as a Hash) :
-  a. :room_id   (should be string) (mandatory)
-  b. :startTime (format should be in milliseconds)  (optional)
-  c. :timeZone (optional)
-  d. :endTime (format should be in milliseconds) (optional)
-  e. :description (optional)
-  f. :tags (optional)
-  
+
+  Arguments (Mixed) :
+
+    (as a Variable) :
+        :meetingID       (Required) (String) An ID of the meeting.
+    (as a Hash) :
+        :startTime      =>  (Optional) (Number (format should be in seconds))
+        :endTime        =>  (Optional) (Number (format should be in seconds))
+        :timeZone       =>  (Optional) (Number) (ex : +1, +2)
+        :description    =>  (Optional) (String)
+        :tags           =>  (Optional) (String)
+
   Request Command :
     innowhite.update_schedule({})
 
   Return Value :
-  a. True or False
+    true or false
 
-
+------------------------------------------------------------------------------------------------------------------------
 
 Get Meeting Play back Recording URL :
   Returns the video playback URL.
 
-  a.  room_id  (should be string) (mandatory)
- 
+  Arguments (as a Variable):
+    :meetingID (Required) (String) An ID of the meeting.
+
   Request Command :
-    innowhite.getRecordingURL(room_id)
+    innowhite.get_recordings(meetingID)
 
   Return Value :
-  a. URL
-
-
-
-Returned data
-
-All results returns as Hash with indifferent access. :data key contains result and :errors contains errors.
+    :url    (String)
+    :type   (String)
+    :length (Number)

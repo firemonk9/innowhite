@@ -9,13 +9,15 @@ class Innowhite
 
   def create_room(fullName, meetingName, params = {})
     params.reverse_merge! :duration => 0, :meetingName => meetingName
-    params.slice!( :meetingID, :attendeePW,
+    data = params.slice(:meetingID, :attendeePW,
                   :moderatorPW, :welcome,
                   :dialNumber, :voiceBridge,
                   :webVoice, :record, :meta,
-                  :duration, :meetingName )
+                  :duration, :meetingName,
+                  :description, :tags)
+    session_data = params.slice(:description, :tags).update(:fullName => fullName)
     checker([:meetingName], params)
-    request(:post, "api_create_room", {:data => params, :fullName => fullName})
+    request(:post, "api_create_room", {:data => data, :session_data => session_data})
   end
 
   def join_meeting(fullName, meetingID, password)
@@ -23,7 +25,6 @@ class Innowhite
     checker([:meetingID, :password, :fullName], params)
     request(:post, "api_join_room", :data => params)
   end
-
 
   def get_sessions(params = {})
     params.slice!( :fullName, :tags, :organizationName )
@@ -48,14 +49,14 @@ class Innowhite
 
   def cancel_meeting(meetingID, password)
     checker([:meetingID], (hash = {:meetingID => meetingID, :password => password}))
-    request(:post, "api_join_room", hash)
+    request(:post, "cancel_meeting", hash)
   end
 
   def update_schedule(meetingID, params = {})
     return true if params.empty?
     params.update(:meetingID => meetingID)
     params.slice!( :meetingID, :startTime, :endTime, :timeZone, :description, :tags )
-    checker([:meeting_id], params)
+    checker([:meetingID], params)
     request(:put, "update_schedule", params)
   end
 
@@ -75,7 +76,7 @@ class Innowhite
   private
     def checker(fields, hash)
       fields.each do |field|
-        (raise exception([field.humanize, "not set"].join(" ")) and return) if hash[field].blank?
+        (raise [field.to_s.humanize, "not set"].join(" ") and return) if hash[field].blank?
       end
     end
 
@@ -93,7 +94,7 @@ class Innowhite
         RestClient.send(method, url, {}, :accept => :json)
       end
       res = JSON::parse(k).with_indifferent_access
-      raise exception(res[:errors]) if res.has_key?(:errors)
+      raise res[:errors] if res.has_key?(:errors)
       res.try(:[], :status) || res
     end
 end

@@ -30,6 +30,8 @@ Create new session :
         :fullName           (Required) (String) A moderator name.
         :meetingName        (Required) (String) A name for the meeting.
     (as a Hash) :
+        :description    =>  (Optional) (String) Description for meeting
+        :tags           =>  (Optional) (String) Tags associated with meeting
         :meetingID      =>  (Optional) (String) A meeting ID that can be used to identify this meeting by the third party application. This must be unique to the server that you are calling. If you supply a non-unique meeting ID, you will still have a successful call, but will receive a warning message in the response. If you intend to use the recording feature, the meetingID shouldn't contain commas.
         :attendeePW     =>  (Optional) (String) The password that will be required for attendees to join the meeting. This is optional, and if not supplied, BBB will assign a random password.
         :moderatorPW    =>	(Optional) (String) The password that will be required for moderators to join the meeting or for certain administrative actions (i.e. ending a meeting). This is optional, and if not supplied, BBB will assign a random password.
@@ -45,8 +47,9 @@ Create new session :
     innowhite.create_room(meetingName, {}). Ex : innowhite.create_room("myname", {:record => true, :duration => 0})
 
   Return value :
-    :url            (String) Meeting URL for admin
-    :credentials    (Hash)   Credentials for other operations
+    :url            (String)            Meeting URL for admin
+    :credentials    (Hash)              Credentials for other operations
+    :userPassword   (String) (Optional) Returns in case if user what created meeting is new user in the system
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -72,16 +75,18 @@ Get the live sessions
   Arguments (as a Hash) :
     :tags               =>  (Optional) (String) Tags, associated with some sessions.
     :fullName           =>  (Optional) (String) Some user.
+    :organizationName   =>  (Optional) (String) Some organization name.
 
   Request Command :
     innowhite.get_sessions({}). Ex : innowhite.get_sessions(:tags => "dogs, cats")
 
   Return value :
-    :meetingID      (String)
-    :description    (String)
-    :tags           (String) All tags associated with this room.
-    :createdBy      (String)
-    :beginTime      (String) Room start time
+    Array of hashes :
+        :meetingID      (String)
+        :description    (String)
+        :tags           (String) All tags associated with this room.
+        :createdBy      (String)
+        :beginTime      (String) Room start time
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -91,8 +96,8 @@ Schedule a session :
   Arguments (as a Hash) :
 
     :fullName       =>  (Required) (String)
-    :startTime      =>  (Required) (Number(in seconds) or DateTime)
-    :endTime        =>  (Required) (Number(in seconds) or DateTime)
+    :startTime      =>  (Required) (Number(DateTime in seconds) or DateTime)
+    :endTime        =>  (Required) (Number(DateTime in seconds) or DateTime)
     :timeZone       =>  (Required) (Number) (ex : +1, +2)
     :description    =>  (Required) (String)
     :tags           =>  (Optional) (String)
@@ -109,8 +114,9 @@ Schedule a session :
     :endTime            (String)
     :timeZone           (String)
     :description        (String)
-    :url                (String)    Meeting URL for admin
-    :credentials        (Hash)      Credentials for other operations
+    :url                (String)            Meeting URL for admin
+    :credentials        (Hash)              Credentials for other operations
+    :userPassword       (String) (Optional) Returns in case if user what created meeting is new user in the system
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -126,12 +132,13 @@ Get the past sessions
     innowhite.past_sessions({})
   
   Return Value :
-    :meetingID          (String)
-    :organizationName   (String)
-    :createdBy          (String)
-    :description        (String)
-    :videoLinks         (Array[String])
-    :tags               (String)
+    Array of hashes :
+        :meetingID          (String)
+        :organizationName   (String)
+        :createdBy          (String)
+        :description        (String)
+        :videoLinks         (Array of hashes)
+        :tags               (String)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -146,14 +153,15 @@ Get the scheduled sessions
     innowhite.get_scheduled_list({})
 
   Return Value:
-    :meetingID          (String)
-    :organizationName   (String)
-    :tags               (String)
-    :createdBy          (String)
-    :beginTime          (String)
-    :endTime            (String)
-    :timeZone           (String)
-    :description        (String)
+    Array of hashes :
+        :meetingID          (String)
+        :organizationName   (String)
+        :tags               (String)
+        :createdBy          (String)
+        :beginTime          (String)
+        :endTime            (String)
+        :timeZone           (String)
+        :description        (String)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -204,6 +212,7 @@ Get Meeting Play back Recording URL :
     innowhite.get_recordings(meetingID)
 
   Return Value :
-    :url    (String)
-    :type   (String)
-    :length (Number)
+    Array of hashes :
+        :url    (String)
+        :type   (String)
+        :length (Number)
